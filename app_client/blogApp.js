@@ -1,5 +1,10 @@
 var blogApp = angular.module('blogApp',['ngRoute']);
 
+//*** REST Web API functions ***
+function getAllBlogs($http){
+    return $http.get('/api/blogs');
+}
+
 //*** Controllers ***
 blogApp.controller('HomeController', function HomeController() {
     var vm = this;
@@ -9,13 +14,19 @@ blogApp.controller('HomeController', function HomeController() {
     vm.message = "Welcome to Kyle Kalbach's Blog site!";
 });
 
-blogApp.controller('ListController', function ListController() {
+blogApp.controller('ListController', function ListController($http) {
     var vm = this;
     vm.pageHeader = {
         title: "Blog List"
     };
-    vm.message = "List page under construction"
 
+    getAllBlogs($http)
+        .then(function successCallBack(response) {
+            vm.blogs = response.data;
+            vm.message = "Blog data found!"
+        },function errorCallBack(response){
+            vm.message = "Could not get list of blogs";
+        });
 });
 
 blogApp.controller('EditController', function EditController() {
@@ -41,6 +52,8 @@ blogApp.controller('AddController', function AddController() {
     };
     vm.message = "Blog add under construction"
 });
+
+
 
 //*** Router Provider ***
 blogApp.config(function($routeProvider,$locationProvider) {
