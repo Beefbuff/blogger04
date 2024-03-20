@@ -5,6 +5,14 @@ function getAllBlogs($http){
     return $http.get('/api/blogs');
 }
 
+function getBlogById($http,id) {
+    return $http.get('/api/blogs/' + id);
+}
+
+function updateBlogById($http,id,data) {
+    return $http.put('/api/blogs/' + id, data);
+}
+
 //*** Controllers ***
 blogApp.controller('HomeController', function HomeController() {
     var vm = this;
@@ -23,19 +31,42 @@ blogApp.controller('ListController', function ListController($http) {
     getAllBlogs($http)
         .then(function successCallBack(response) {
             vm.blogs = response.data;
-            vm.message = "Blog data found!"
+            vm.message = "Blog data found!";
         },function errorCallBack(response){
             vm.message = "Could not get list of blogs";
         });
 });
 
-blogApp.controller('EditController', function EditController() {
+blogApp.controller('EditController', ['$http','$routeParams','$state',function EditController($http,$routeParams,$state) {
     var vm = this;
+    vm.blog ={};
+    vm.id = $routeParams.id;
     vm.pageHeader = {
         title: "Blog Edit"
     };
-    vm.message = "Edit page is under construction"
-});
+
+    getBlogById($http,vm.id)
+        .then(function successCallBack(response) {
+            vm.blog = response.data;
+            vm.message ="Blog data found!"
+            console.log(vm.blog);
+        }),function errorCallBack(response){
+            vm.message = "Could not find Blog with id of " + vm.id;
+        };
+    vm.submit = function(){
+        var data = vm.blog;
+        data.title = userForm.title.value;
+        data.text = userForm.text.value;
+
+    updateBlogById($http,vm.id,data)
+        .then(function successCallBack(response){
+            vm.message="Blog data updated!";
+            $state.go('#/blog-list');
+        }),function errorCallBack(response){
+            vm.message = "Could not update book given id of " + vm.id + userForm.title.text + " " + userForm.text.text ;
+        }
+    }
+}]);
 
 blogApp.controller('DeleteController', function EditController() {
     var vm = this;

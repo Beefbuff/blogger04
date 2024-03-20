@@ -1,6 +1,9 @@
 <div ng-controller="AddController">
-    <head>
-      <title>{{vm.pageHeader.title}}</title>
-    </head> 
-    <h4>{{vm.message}}</h4>
+  <div class="card text-success bg-dark mb-3" style="width: 30%;">
+    <div class="card-body">
+        <form method="post" action="/add" id="addBlog">
+            <h1 style="font-size: 16px;text-decoration: underline;">Blog Title</h1><textarea class="text-success" type="text" name="title" placeholder="" style=" width: 80%;">Input Title</textarea>
+            <h2 style="font-size: 16px;text-decoration: underline;">Blog Text </h2><textarea class="text-success" name="text" placeholder="" style="width: 80%;">Input Text</textarea><br/></form><input class="btn btn-success btn-sm text-dark" input="input" type="submit" form="addBlog" style="float: right;"
+            value="Add Blog" /></div>
   </div>
+</div>
