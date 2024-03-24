@@ -6,13 +6,20 @@ function getAllBlogs($http){
 }
 
 function getBlogById($http,id) {
-    return $http.get('/api/blogs/' + id);
+    return $http.get('/api/edit/' + id);
 }
 
 function updateBlogById($http,id,data) {
-    return $http.put('/api/blogs/' + id, data);
+    return $http.put('/api/edit/' + id, data);
 }
 
+function addBlog($http,data){
+    return $http.post('/api/blogs',data);
+}
+
+function deleteBlog($http,id){
+    return $http.delete('/api/delete/' + id);
+}
 //*** Controllers ***
 blogApp.controller('HomeController', function HomeController() {
     var vm = this;
@@ -37,7 +44,7 @@ blogApp.controller('ListController', function ListController($http) {
         });
 });
 
-blogApp.controller('EditController', ['$http','$routeParams','$state',function EditController($http,$routeParams,$state) {
+blogApp.controller('EditController', ['$http','$routeParams','$location',function EditController($http,$routeParams,$location) {
     var vm = this;
     vm.blog ={};
     vm.id = $routeParams.id;
@@ -49,7 +56,6 @@ blogApp.controller('EditController', ['$http','$routeParams','$state',function E
         .then(function successCallBack(response) {
             vm.blog = response.data;
             vm.message ="Blog data found!"
-            console.log(vm.blog);
         }),function errorCallBack(response){
             vm.message = "Could not find Blog with id of " + vm.id;
         };
@@ -57,33 +63,62 @@ blogApp.controller('EditController', ['$http','$routeParams','$state',function E
         var data = vm.blog;
         data.title = userForm.title.value;
         data.text = userForm.text.value;
-
+        $location.path(['/blog-list']);
     updateBlogById($http,vm.id,data)
         .then(function successCallBack(response){
             vm.message="Blog data updated!";
-            $state.go('#/blog-list');
         }),function errorCallBack(response){
             vm.message = "Could not update book given id of " + vm.id + userForm.title.text + " " + userForm.text.text ;
         }
     }
 }]);
 
-blogApp.controller('DeleteController', function EditController() {
+blogApp.controller('DeleteController',['$http','$location','$routeParams',function DeleteController($http,$location,$routeParams) {
     var vm = this;
+    vm.blog ={};
+    vm.id = $routeParams.id;
     vm.pageHeader = {
         title: "Blog Delete"
     };
-    vm.message = "Delete page under construction"
-});
+    getBlogById($http,vm.id)
+    .then(function successCallBack(response) {
+        vm.blog = response.data;
+        vm.message ="Blog data found!"
+    }),function errorCallBack(response){
+        vm.message = "Could not find Blog with id of " + vm.id;
+    };
 
-blogApp.controller('AddController', function AddController() {
+    vm.delete = function(){
+        $location.path(['/blog-list']);
+        deleteBlog($http,vm.id)
+        .then(function successCallBack(response){
+            vm.message="Blog Deleted!";
+        }),function errorCallBack(response){
+            vm.message = "Failed to delete Blog" ;
+        }
+    }
+}]);
+
+blogApp.controller('AddController',['$http','$location',function AddController($http,$location) {
     var vm = this;
     vm.pageHeader = {
         title: "Blog Add"
     };
-    vm.message = "Blog add under construction"
-});
+    vm.add = function(){
+        var data = {};
+        data.title = userForm.title.value;
+        data.text = userForm.text.value;
+        data.createOn = Date.now();
 
+    addBlog($http,data)
+        .then(function successCallBack(response) {
+            vm.message = "Blog Added";
+            $location.path(['/blog-list']);
+        }),function errorCallBack(response){
+            vm.message = "Blog failed to add"; 
+        }
+    }
+}]);
 
 
 //*** Router Provider ***
